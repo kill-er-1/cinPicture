@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-cinpicture
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: dbPassword        # root 密码
+      MYSQL_DATABASE: my_database      # 启动时自动创建的空库名 (可选)
+      MYSQL_USER: dbuser             # 创建一个非 root 用户 (可选)
+      MYSQL_PASSWORD: dev_password     # 非 root 用户的密码 (可选)
+      TZ: Asia/Shanghai                # 设置时区
+    volumes:
+      - ./data:/var/lib/mysql          # 数据持久化
+      - ./conf:/etc/mysql/conf.d       # 挂载配置目录
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
