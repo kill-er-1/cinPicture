@@ -1,0 +1,15 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ],
+  "compilerOptions": {
+    "module": "esnext", // 必须改成 esnext 或 es2020/es2022
+    "moduleResolution": "bundler" // Vite 项目推荐用 bundler（或 node）
+  }
+}
