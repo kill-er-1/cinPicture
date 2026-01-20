@@ -112,7 +112,7 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.cin.cinpicturebackend.CinPictureBackendApplication</mainClass>
-                    <skip>true</skip>
+                    <skip>false</skip>
                 </configuration>
                 <executions>
                     <execution>
