@@ -25,25 +25,25 @@
     -->
       <a-col flex="120px">
         <div class="user-login-status">
-            <div v-if="loginUserStore.loginUser.id">
-              <a-dropdown>
-                <!-- - - Ant Design Vue 的下拉组件：默认会把里面的“触发区域”作为点击/悬停触发点，展示一个浮层菜单。 -->
-                <ASpace>
-                  <!-- Ant Design Vue 的间距容器，把里面的元素水平排列并自动加间距（这里是头像 + 文本）。 -->
-                  <a-avatar :src="loginUserStore.loginUser.userAvatar" />
-                  {{ loginUserStore.loginUser.userName ?? '无名' }}
-                  <!-- ?? 是 JS 的空值合并运算符，只在 null/undefined 时才用右边 -->
-                </ASpace>
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item @click="doLogout">
-                      <LogoutOutlined />
-                      退出登录
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </div>
+          <div v-if="loginUserStore.loginUser.id">
+            <a-dropdown>
+              <!-- - - Ant Design Vue 的下拉组件：默认会把里面的“触发区域”作为点击/悬停触发点，展示一个浮层菜单。 -->
+              <ASpace>
+                <!-- Ant Design Vue 的间距容器，把里面的元素水平排列并自动加间距（这里是头像 + 文本）。 -->
+                <a-avatar :src="loginUserStore.loginUser.userAvatar" />
+                {{ loginUserStore.loginUser.userName ?? '无名' }}
+                <!-- ?? 是 JS 的空值合并运算符，只在 null/undefined 时才用右边 -->
+              </ASpace>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item @click="doLogout">
+                    <LogoutOutlined />
+                    退出登录
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </div>
           <div v-else>
             <a-button type="primary" href="/user/login">登录</a-button>
           </div>
@@ -60,7 +60,8 @@ import { h, ref } from 'vue'
   2.ref是声明响应式变量
  */
 import { HomeOutlined } from '@ant-design/icons-vue'
-import { MenuProps, message } from 'ant-design-vue'
+import type { MenuProps } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { userLogoutUsingPost } from '@/api/userController'
@@ -85,10 +86,20 @@ const items = ref<MenuProps['items']>([
     title: '关于',
   },
   {
+    key: '/add_picture',
+    label: '创建图片',
+    title: '创建图片',
+  },
+  {
     key: 'others',
     label: h('a', { href: 'http://caide.xin', target: '_blank' }, 'cin'),
     //h(组件或标签, 属性对象, 子内容)
     title: 'cin',
+  },
+  {
+    key: '/admin/pictureManage',
+    label: '图片管理',
+    title: '图片管理',
   },
 ])
 
@@ -107,11 +118,11 @@ const doLogout = async () => {
   console.log(res)
   if (res.data.code === 0) {
     loginUserStore.setLoginUser({
-      userName:'未登录',
+      userName: '未登录',
     })
     message.success('退出登录成功')
     await router.push('/user/login')
-  }else{
+  } else {
     message.error('退出登录失败' + res.data.message)
   }
 }
