@@ -87,6 +87,8 @@ public class PictureVO implements Serializable {
      * 更新时间  
      */  
     private Date updateTime;  
+
+    private String thumbnailUrl;
   
     /**  
      * 创建用户信息  

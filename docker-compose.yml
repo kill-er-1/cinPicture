@@ -17,3 +17,12 @@ services:
       - ./data:/var/lib/mysql          # 数据持久化
       - ./conf:/etc/mysql/conf.d       # 挂载配置目录
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cinpicture
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data

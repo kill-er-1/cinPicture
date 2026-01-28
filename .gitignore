@@ -33,5 +33,26 @@ build/
 .vscode/
 
 data/
+conf/
+redis-data/
+
+logs/
+*.log
+*.pid
+hs_err_pid*.log
+replay_pid*.log
+
+.DS_Store
+
+cin-picture-frontend/node_modules/
+cin-picture-frontend/dist/
+cin-picture-frontend/.vite/
+cin-picture-frontend/npm-debug.log*
+cin-picture-frontend/yarn-debug.log*
+cin-picture-frontend/yarn-error.log*
+cin-picture-frontend/pnpm-debug.log*
+cin-picture-frontend/.env.local
+cin-picture-frontend/.env.*.local
 
 application-local.yml
+application-*.local.yml

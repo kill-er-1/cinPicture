@@ -3,11 +3,15 @@ package com.cin.cinpicturebackend.controller;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +42,11 @@ import com.cin.cinpicturebackend.model.vo.PictureTagCategory;
 import com.cin.cinpicturebackend.model.vo.PictureVO;
 import com.cin.cinpicturebackend.service.PictureService;
 import com.cin.cinpicturebackend.service.UserService;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 
 @RestController
@@ -51,6 +58,15 @@ public class PictureController {
 
     @Resource
     private PictureService pictureService;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    private final Cache<String, String> LOCAL_CACHE = Caffeine.newBuilder().initialCapacity(1024)
+            .maximumSize(10000L)
+            // 缓存 5 分钟移除
+            .expireAfterWrite(5L, TimeUnit.MINUTES)
+            .build();
 
     @PostMapping("/upload")
     public BaseResponse<PictureVO> uploadPicture(@RequestPart("file") MultipartFile multipartFile,
@@ -226,6 +242,46 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
         return ResultUtils.success(uploadCount);
+    }
+
+    @PostMapping("/list/page/vo/cache")
+    public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(
+            @RequestBody PictureQueryRequest pictureQueryRequest, HttpServletRequest request) {
+
+        // 1.防止爬虫
+        int current = pictureQueryRequest.getCurrent();
+        int pageSize = pictureQueryRequest.getPageSize();
+        ThrowUtils.throwIf(pageSize > 20, ErrorCode.PARAMS_ERROR);
+
+        // 2.审核状态通过
+        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+
+        // 3.构造查询key md5加密的key
+        String querykey = JSONUtil.toJsonStr(pictureQueryRequest);
+        String hashKey = DigestUtils.md5DigestAsHex(querykey.getBytes());
+        String cachedKey = "cinpicture:listPictureVOByPage:" + hashKey;
+        // 4.若查到就返回
+        // 从本地缓存中查询
+        String cachedValue = LOCAL_CACHE.getIfPresent(cachedKey);
+        // 从redis中查询
+        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
+        String cachedValueRedis = opsForValue.get(cachedKey);
+        if (cachedValueRedis != null) {
+            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
+            return ResultUtils.success(cachedPage);
+        }
+
+        // 5.没查到查数据库，还要设置过期时间
+        Page<Picture> picturePage = pictureService.page(new Page<>(current, pageSize),
+                pictureService.getQueryWrapper(pictureQueryRequest));
+        Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage, request);
+        String cachedPageString = JSONUtil.toJsonStr(pictureVOPage);
+
+        int expirationTime = 300 + RandomUtil.randomInt(0, 300);
+        opsForValue.set(cachedKey, cachedPageString, expirationTime,TimeUnit.SECONDS);
+        LOCAL_CACHE.put(cachedKey, cachedPageString);
+
+        return ResultUtils.success(pictureVOPage);
     }
 
 }

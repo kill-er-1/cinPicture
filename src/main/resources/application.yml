@@ -1,7 +1,12 @@
 server:
   port: 8123
   servlet:
-    context-path: /api
+    context-path:
+      /api
+      # cookie 30 天过期
+    session:
+      cookie:
+        max-age: 2592000
 spring:
   servlet:
     multipart:
@@ -14,9 +19,19 @@ spring:
     url: jdbc:mysql://localhost:3306/my_database
     username: root
     password: dbPassword
+  #redis
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    timeout: 5000
   profiles:
     active: local
-
+  # session 配置
+  session:
+    store-type: redis
+    # session 30 天过期
+    timeout: 2592000
 
 mybatis-plus:
   configuration:

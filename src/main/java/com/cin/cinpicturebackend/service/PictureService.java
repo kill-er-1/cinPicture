@@ -5,8 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureReviewRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;

@@ -112,6 +112,8 @@ public class Picture {
      */
     private Date reviewTime;
 
+    private String thumbnailUrl;
+
     /**
      * 是否删除
      */
