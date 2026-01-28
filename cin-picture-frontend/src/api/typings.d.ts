@@ -75,14 +75,20 @@ declare namespace API {
     id?: number
   }
 
+  type doPictureReviewUsingPOSTParams = {
+    id?: number
+    reviewMessage?: string
+    reviewStatus?: number
+  }
+
   type getPictureByIdUsingGETParams = {
     /** id */
-    id?: string
+    id?: number
   }
 
   type getPictureVOByIdUsingGETParams = {
     /** id */
-    id?: string
+    id?: number
   }
 
   type getUserByIdUsingGETParams = {
@@ -134,7 +140,7 @@ declare namespace API {
     category?: string
     createTime?: string
     editTime?: string
-    id?: string
+    id?: number
     introduction?: string
     isDelete?: number
     name?: string
@@ -143,6 +149,10 @@ declare namespace API {
     picScale?: number
     picSize?: number
     picWidth?: number
+    reviewMessage?: string
+    reviewStatus?: number
+    reviewTime?: string
+    reviewerId?: number
     tags?: string
     updateTime?: string
     url?: string
@@ -151,7 +161,7 @@ declare namespace API {
 
   type PictureEditRequest = {
     category?: string
-    id?: string
+    id?: number
     introduction?: string
     name?: string
     tags?: string[]
@@ -160,7 +170,7 @@ declare namespace API {
   type PictureQueryRequest = {
     category?: string
     current?: number
-    id?: string
+    id?: number
     introduction?: string
     name?: string
     pageSize?: number
@@ -169,6 +179,9 @@ declare namespace API {
     picScale?: number
     picSize?: number
     picWidth?: number
+    reviewMessage?: string
+    reviewStatus?: number
+    reviewerId?: number
     searchText?: string
     sortField?: string
     sortOrder?: string
@@ -183,7 +196,7 @@ declare namespace API {
 
   type PictureUpdateRequest = {
     category?: string
-    id?: string
+    id?: number
     introduction?: string
     name?: string
     tags?: string[]
@@ -193,7 +206,7 @@ declare namespace API {
     category?: string
     createTime?: string
     editTime?: string
-    id?: string
+    id?: number
     introduction?: string
     name?: string
     picFormat?: string
@@ -214,9 +227,8 @@ declare namespace API {
   }
 
   type uploadPictureUsingPOSTParams = {
-    id?: string
+    id?: number
   }
-  // string （后端 Long 序列化成字符串），但接口类型 uploadPictureUsingPOSTParams 里仍然写的是 id?: number ，所以把 { id: string } 传进去就不兼容了。
 
   type User = {
     createTime?: string
