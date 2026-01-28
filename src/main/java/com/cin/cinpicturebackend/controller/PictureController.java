@@ -29,6 +29,7 @@ import com.cin.cinpicturebackend.model.dto.picture.PictureEditRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureReviewRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureUpdateRequest;
+import com.cin.cinpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureUploadRequest;
 import com.cin.cinpicturebackend.model.entity.Picture;
 import com.cin.cinpicturebackend.model.entity.User;
@@ -214,6 +215,17 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         pictureService.doPictureReview(pictureReviewRequest, loginUser);
         return ResultUtils.success(true);
+    }
+
+    @PostMapping("/upload/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Integer> uploadPictureByBatch(
+            @RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest,
+            HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
+        return ResultUtils.success(uploadCount);
     }
 
 }

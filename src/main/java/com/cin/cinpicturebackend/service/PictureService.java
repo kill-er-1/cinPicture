@@ -3,6 +3,8 @@ package com.cin.cinpicturebackend.service;
 import javax.servlet.http.HttpServletRequest;
 
 import com.cin.cinpicturebackend.model.dto.picture.PictureReviewRequest;
+import com.cin.cinpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -36,4 +38,8 @@ public interface PictureService extends IService<Picture> {
     void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
 
     void fillReviewParams(Picture picture, User loginUser);
+
+    Integer uploadPictureByBatch(
+            PictureUploadByBatchRequest pictureUploadByBatchRequest,
+            User loginUser);
 }
