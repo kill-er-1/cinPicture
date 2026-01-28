@@ -20,6 +20,9 @@ import com.cin.cinpicturebackend.exception.BusinessException;
 import com.cin.cinpicturebackend.exception.ErrorCode;
 import com.cin.cinpicturebackend.exception.ThrowUtils;
 import com.cin.cinpicturebackend.manager.FileManager;
+import com.cin.cinpicturebackend.manager.upload.FilePictureUpload;
+import com.cin.cinpicturebackend.manager.upload.PictureUploadTemplate;
+import com.cin.cinpicturebackend.manager.upload.UrlPictureUpload;
 import com.cin.cinpicturebackend.mapper.PictureMapper;
 import com.cin.cinpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureUploadRequest;
@@ -47,16 +50,22 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         implements PictureService {
 
     @Resource
-    private FileManager fileManager;
+    private FilePictureUpload filePictureUpload;
+
+    @Resource
+    private UrlPictureUpload urlPictureUpload;
 
     @Resource
     private UserService userService;
 
     @Override
-    public PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest,
+    public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest,
             User loginUser) {
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
 
+        if (inputSource == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "图片为空");
+        }
         // 先要判断是新增还是修改
         Long pictureId = null;
 
@@ -76,7 +85,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 上传图片，得到信息
         // 按照用户 ID 划分目录
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
-        UploadPictureResult uploadPictureResult = fileManager.uploadPicture(multipartFile, uploadPathPrefix);
+        PictureUploadTemplate pictureUploadTemplate = filePictureUpload;
+        if (inputSource instanceof String) {
+            pictureUploadTemplate = urlPictureUpload;
+        }
+        UploadPictureResult uploadPictureResult = pictureUploadTemplate.uploadPicture(inputSource, uploadPathPrefix);
         // 构造要入库的图片信息
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());

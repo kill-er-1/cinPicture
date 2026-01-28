@@ -21,7 +21,7 @@ import com.cin.cinpicturebackend.model.vo.PictureVO;
  */
 public interface PictureService extends IService<Picture> {
 
-    PictureVO uploadPicture(MultipartFile multipartFile,
+    PictureVO uploadPicture(Object inputSource,
             PictureUploadRequest pictureUploadRequest,
             User loginUser);
 
