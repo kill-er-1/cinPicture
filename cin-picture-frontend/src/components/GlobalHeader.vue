@@ -101,6 +101,11 @@ const items = ref<MenuProps['items']>([
     label: '图片管理',
     title: '图片管理',
   },
+  {
+    key: '/admin/spaceManage',
+    label: '空间管理',
+    title: '空间管理',
+  },
 ])
 
 const doMenuClick = ({ key }: { key: string }) => {

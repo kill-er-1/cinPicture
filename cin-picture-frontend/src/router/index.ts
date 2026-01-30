@@ -7,6 +7,7 @@ import UserLoginPage from '@/pages/user/UserLoginPage.vue'
 import UserRegisterPage from '@/pages/user/UserRegisterPage.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import AddPictureBatchPage from '@/pages/AddPictureBatchPage.vue'
+import SpaceManagePage from '@/pages/admin/SpaceManagePage.vue'
 const router = createRouter({
   history: createWebHistory('/'),
   routes: [
@@ -50,6 +51,11 @@ const router = createRouter({
       path: '/add_picture/batch',
       name: '批量创建图片',
       component: AddPictureBatchPage,
+    },
+    {
+      path: '/admin/spaceManage',
+      name: '空间管理',
+      component: SpaceManagePage,
     },
   ],
 })
