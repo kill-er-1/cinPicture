@@ -176,7 +176,6 @@ public class PictureController {
         long size = pictureQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
         // 空间权限校验
         Long spaceId = pictureQueryRequest.getSpaceId();
         // 公开图库

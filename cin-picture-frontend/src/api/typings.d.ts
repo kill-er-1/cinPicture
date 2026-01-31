@@ -234,7 +234,7 @@ declare namespace API {
   type PictureQueryRequest = {
     category?: string
     current?: number
-    id?: number
+    id?: number | string
     introduction?: string
     name?: string
     nullSpaceId?: boolean
@@ -250,7 +250,7 @@ declare namespace API {
     searchText?: string
     sortField?: string
     sortOrder?: string
-    spaceId?: number
+    spaceId?: number | string
     tags?: string[]
     userId?: number
   }
@@ -276,9 +276,9 @@ declare namespace API {
 
   type PictureUploadRequest = {
     fileUrl?: string
-    id?: number
+    id?: number | string
     picName?: string
-    spaceId?: number
+    spaceId?: number | string
   }
 
   type PictureVO = {

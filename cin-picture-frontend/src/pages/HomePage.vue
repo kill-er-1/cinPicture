@@ -28,40 +28,14 @@
     </a-space>
   </div>
   <!-- 图片列表 -->
-  <a-list
-    :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 }"
-    :data-source="dataList"
-    :pagination="pagination"
-    :loading="loading"
-  >
-    <template #renderItem="{ item: picture }">
-      <a-list-item style="padding: 0">
-        <!-- 单张图片 -->
-        <a-card hoverable @click="doClickPicture(picture)">
-          <template #cover>
-            <img
-              style="height: 180px; object-fit: cover"
-              :alt="picture.name"
-              :src="picture.thumbnailUrl ?? picture.url"
-              loading="lazy"
-            />
-          </template>
-          <a-card-meta :title="picture.name">
-            <template #description>
-              <a-flex>
-                <a-tag color="green">
-                  {{ picture.category ?? '默认' }}
-                </a-tag>
-                <a-tag v-for="tag in picture.tags" :key="tag">
-                  {{ tag }}
-                </a-tag>
-              </a-flex>
-            </template>
-          </a-card-meta>
-        </a-card>
-      </a-list-item>
-    </template>
-  </a-list>
+  <PictureList :dataList="dataList" :loading="loading" />
+  <a-pagination
+    style="text-align: right"
+    v-model:current="searchParams.current"
+    v-model:pageSize="searchParams.pageSize"
+    :total="total"
+    @change="onPageChange"
+  />
 </template>
 
 <script setup lang="ts">
@@ -70,8 +44,9 @@ import {
   listPictureVoByPageUsingPost,
 } from '@/api/pictureController'
 import { message } from 'ant-design-vue'
-import { onMounted, reactive, ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import PictureList from '@/components/PictureList.vue'
+import { onMounted, reactive, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 const dataList = ref<API.PictureVO[]>([])
 const total = ref<number>(0)
@@ -91,19 +66,11 @@ const searchParams = reactive<API.PictureQueryRequest>({
 })
 
 // 分页参数
-const pagination = computed(() => {
-  return {
-    current: searchParams.current ?? 1,
-    pageSize: searchParams.pageSize ?? 10,
-    total: total.value,
-    // 切换页号时，会修改搜索参数并获取数据
-    onChange: (page: number, pageSize: number) => {
-      searchParams.current = page
-      searchParams.pageSize = pageSize
-      fetchData()
-    },
-  }
-})
+const onPageChange = (page: number, pageSize: number) => {
+  searchParams.current = page
+  searchParams.pageSize = pageSize
+  fetchData()
+}
 
 //获取数据
 const fetchData = async () => {
@@ -133,14 +100,43 @@ const fetchData = async () => {
   loading.value = false
 }
 
+const route = useRoute()
+
+const syncSpaceFilterFromRoute = () => {
+  const spaceIdQuery = route.query.spaceId
+  const spaceId = Array.isArray(spaceIdQuery) ? spaceIdQuery[0] : spaceIdQuery
+
+  if (spaceId) {
+    // 避免超大 Long 精度丢失：不要 Number()
+    searchParams.spaceId = String(spaceId) as any
+    searchParams.nullSpaceId = undefined
+    return
+  }
+
+  const nullSpaceIdQuery = route.query.nullSpaceId
+  const nullSpaceIdVal = Array.isArray(nullSpaceIdQuery)
+    ? nullSpaceIdQuery[0]
+    : nullSpaceIdQuery
+
+  searchParams.spaceId = undefined
+  searchParams.nullSpaceId = nullSpaceIdVal ? nullSpaceIdVal !== 'false' : true
+}
+
+
+
 const doSearch = () => {
-  // 重置搜索条件
   searchParams.current = 1
   fetchData()
 }
-onMounted(() => {
-  fetchData()
-})
+
+watch(
+  () => [route.query.spaceId, route.query.nullSpaceId],
+  () => {
+    syncSpaceFilterFromRoute()
+    doSearch()
+  },
+  { immediate: true }
+)
 
 //获取标签和分类选项
 const getTagCategoryOptions = async () => {
@@ -157,13 +153,6 @@ onMounted(() => {
   getTagCategoryOptions()
 })
 
-const router = useRouter()
-// 跳转至图片详情
-const doClickPicture = (picture: API.PictureVO) => {
-  router.push({
-    path: `/picture/${picture.id}`,
-  })
-}
 </script>
 
 <style scoped>
