@@ -6,6 +6,15 @@
         <a-button type="primary" :href="`/add_picture?spaceId=${id}`" target="_blank">
           + 创建图片
         </a-button>
+        <a-button
+          type="primary"
+          ghost
+          :icon="h(BarChartOutlined)"
+          :href="`/space_analyze?spaceId=${id}`"
+          target="_blank"
+        >
+          空间分析
+        </a-button>
         <a-tooltip
           :title="`占用空间 ${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`"
         >
@@ -14,12 +23,7 @@
       </a-space>
     </a-flex>
 
-    <PictureList
-      :dataList="dataList"
-      :loading="loading"
-      showOp
-      :onReload="fetchData"
-    />
+    <PictureList :dataList="dataList" :loading="loading" showOp :onReload="fetchData" />
     <a-pagination
       style="text-align: right"
       v-model:current="searchParams.current"
@@ -37,12 +41,13 @@ import { listPictureVoByPageUsingPost } from '@/api/pictureController'
 import PictureList from '@/components/PictureList.vue'
 import { formatSize } from '@/utils'
 import { message } from 'ant-design-vue'
+import { BarChartOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 
 const props = defineProps<{
   id: string | number
 }>()
-
 
 const space = ref<API.SpaceVO>({})
 
