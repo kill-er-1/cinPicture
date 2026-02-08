@@ -22,7 +22,10 @@
         </a-tooltip>
       </a-space>
     </a-flex>
-
+    <div style="margin-bottom: 16px" />
+    <!-- 搜索表单 -->
+    <PictureSearchForm :onSearch="onSearch" />
+    <div style="margin-bottom: 16px" />
     <PictureList :dataList="dataList" :loading="loading" showOp :onReload="fetchData" />
     <a-pagination
       style="text-align: right"
@@ -44,6 +47,7 @@ import { message } from 'ant-design-vue'
 import { BarChartOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 import { computed, onMounted, reactive, ref } from 'vue'
+import PictureSearchForm from '@/components/PictureSearchForm.vue'
 
 const props = defineProps<{
   id: string | number
@@ -70,7 +74,7 @@ const dataList = ref<API.PictureVO[]>([])
 const total = ref<number>(0)
 const loading = ref<boolean>(true)
 
-const searchParams = reactive<API.PictureQueryRequest>({
+const searchParams = ref<API.PictureQueryRequest>({
   current: 1,
   pageSize: 12,
   sortField: 'createTime',
@@ -78,8 +82,8 @@ const searchParams = reactive<API.PictureQueryRequest>({
 })
 
 const onPageChange = (page: number, pageSize: number) => {
-  searchParams.current = page
-  searchParams.pageSize = pageSize
+  searchParams.value.current = page
+  searchParams.value.pageSize = pageSize
   fetchData()
 }
 
@@ -87,7 +91,7 @@ const fetchData = async () => {
   loading.value = true
   const params: API.PictureQueryRequest = {
     spaceId: String(props.id),
-    ...searchParams,
+    ...searchParams.value,
   }
   console.log('查询图片参数：', params)
   const res = await listPictureVoByPageUsingPost(params)
@@ -113,4 +117,13 @@ onMounted(() => {
   fetchSpaceDetail()
   fetchData()
 })
+
+const onSearch = (newSearchParams:API.PictureQueryRequest) => {
+  searchParams.value = {
+    ...searchParams.value,
+    ...newSearchParams,
+    current: 1, // 搜索时回到第一页
+  }
+  fetchData()
+}
 </script>
