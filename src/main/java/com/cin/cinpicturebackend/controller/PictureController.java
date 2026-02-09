@@ -21,6 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cin.cinpicturebackend.annotation.AuthCheck;
+import com.cin.cinpicturebackend.api.aliyunai.AliYunAiApi;
+import com.cin.cinpicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.cin.cinpicturebackend.api.aliyunai.model.GetOutPaintingTaskResponse;
 import com.cin.cinpicturebackend.common.BaseResponse;
 import com.cin.cinpicturebackend.common.DeleteRequest;
 import com.cin.cinpicturebackend.common.ResultUtils;
@@ -28,6 +31,7 @@ import com.cin.cinpicturebackend.constant.UserConstant;
 import com.cin.cinpicturebackend.exception.BusinessException;
 import com.cin.cinpicturebackend.exception.ErrorCode;
 import com.cin.cinpicturebackend.exception.ThrowUtils;
+import com.cin.cinpicturebackend.model.dto.picture.CreatePictureOutPaintingTaskRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureEditRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureReviewRequest;
@@ -48,6 +52,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 
 @RestController
@@ -65,6 +70,9 @@ public class PictureController {
 
   @Resource
   private SpaceService spaceService;
+
+  @Resource
+  private AliYunAiApi aliYunAiApi;
 
   private final Cache<String, String> LOCAL_CACHE = Caffeine.newBuilder().initialCapacity(1024)
       .maximumSize(10000L)
@@ -284,4 +292,29 @@ public class PictureController {
     return ResultUtils.success(pictureVOPage);
   }
 
+  /**
+   * 创建 AI 扩图任务
+   */
+  @PostMapping("/out_painting/create_task")
+  public BaseResponse<CreateOutPaintingTaskResponse> createPictureOutPaintingTask(
+      @RequestBody CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest,
+      HttpServletRequest request) {
+    if (createPictureOutPaintingTaskRequest == null || createPictureOutPaintingTaskRequest.getPictureId() == null) {
+      throw new BusinessException(ErrorCode.PARAMS_ERROR);
+    }
+    User loginUser = userService.getLoginUser(request);
+    CreateOutPaintingTaskResponse response = pictureService
+        .createPictureOutPaintingTask(createPictureOutPaintingTaskRequest, loginUser);
+    return ResultUtils.success(response);
+  }
+
+  /**
+   * 查询 AI 扩图任务
+   */
+  @GetMapping("/out_painting/get_task")
+  public BaseResponse<GetOutPaintingTaskResponse> getPictureOutPaintingTask(String taskId) {
+    ThrowUtils.throwIf(StrUtil.isBlank(taskId), ErrorCode.PARAMS_ERROR);
+    GetOutPaintingTaskResponse task = aliYunAiApi.getOutPaintingTask(taskId);
+    return ResultUtils.success(task);
+  }
 }

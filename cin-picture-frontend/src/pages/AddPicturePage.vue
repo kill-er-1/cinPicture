@@ -7,10 +7,11 @@ import {
 import PictureUpload from '@/components/PictureUpload.vue'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 import ImageCropper from '@/components/ImageCropper.vue'
+import ImageOutPainting from '@/components/ImageOutPainting.vue'
 import { message } from 'ant-design-vue'
 import { computed, onMounted, reactive, ref, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { EditOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
 
 type Option = { value: string; label: string }
 
@@ -107,6 +108,8 @@ onMounted(() => {
 
 // 图片编辑弹窗引用
 const imageCropperRef = ref()
+// AI 扩图弹窗引用
+const imageOutPaintingRef = ref()
 
 // 编辑图片
 const doEditPicture = () => {
@@ -115,8 +118,20 @@ const doEditPicture = () => {
   }
 }
 
+// AI 扩图
+const doImagePainting = () => {
+  if (imageOutPaintingRef.value) {
+    imageOutPaintingRef.value.openModal()
+  }
+}
+
 // 编辑成功事件
 const onCropSuccess = (newPicture: API.PictureVO) => {
+  picture.value = newPicture
+}
+
+// AI 扩图成功事件
+const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
 }
 </script>
@@ -129,8 +144,7 @@ const onCropSuccess = (newPicture: API.PictureVO) => {
       保存至空间：<a :href="`/space/${spaceId}`" target="_blank">{{ spaceId }}</a>
     </a-typography-paragraph>
     <!-- 选择上传方式 -->
-    <a-tabs v-model:activeKey="uploadType"
-      >>
+    <a-tabs v-model:activeKey="uploadType">
       <a-tab-pane key="file" tab="文件上传">
         <PictureUpload :picture="picture" :onSuccess="onSuccess" :spaceId="spaceId" />
       </a-tab-pane>
@@ -140,13 +154,24 @@ const onCropSuccess = (newPicture: API.PictureVO) => {
     </a-tabs>
     <!-- 图片编辑 -->
     <div v-if="picture" class="edit-bar">
-      <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+      <a-space size="middle">
+        <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+        <a-button type="primary" ghost :icon="h(FullscreenOutlined)" @click="doImagePainting">
+          AI 扩图
+        </a-button>
+      </a-space>
       <ImageCropper
         ref="imageCropperRef"
         :imageUrl="picture?.url"
         :picture="picture"
         :spaceId="spaceId"
         :onSuccess="onCropSuccess"
+      />
+      <ImageOutPainting
+        ref="imageOutPaintingRef"
+        :picture="picture"
+        :spaceId="spaceId"
+        :onSuccess="onImageOutPaintingSuccess"
       />
     </div>
     <a-form v-if="picture" layout="vertical" :model="pictureForm" @finish="handleSubmit">

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cin.cinpicturebackend.api.aliyunai.AliYunAiApi;
+import com.cin.cinpicturebackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.cin.cinpicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.cin.cinpicturebackend.exception.BusinessException;
 import com.cin.cinpicturebackend.exception.ErrorCode;
 import com.cin.cinpicturebackend.exception.ThrowUtils;
@@ -30,6 +34,7 @@ import com.cin.cinpicturebackend.manager.upload.FilePictureUpload;
 import com.cin.cinpicturebackend.manager.upload.PictureUploadTemplate;
 import com.cin.cinpicturebackend.manager.upload.UrlPictureUpload;
 import com.cin.cinpicturebackend.mapper.PictureMapper;
+import com.cin.cinpicturebackend.model.dto.picture.CreatePictureOutPaintingTaskRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureEditRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureReviewRequest;
@@ -81,6 +86,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
   @Resource
   private TransactionTemplate transactionTemplate;
+
+  @Resource
+  private AliYunAiApi aliYunAiApi;
 
   @Override
   public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest,
@@ -515,4 +523,21 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
   }
 
+  @Override
+  public CreateOutPaintingTaskResponse createPictureOutPaintingTask(
+      CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, User loginUser) {
+    Long pictureId = createPictureOutPaintingTaskRequest.getPictureId();
+    Picture picture = Optional.ofNullable(this.getById(pictureId))
+        .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "图片不存在"));
+    // 校验权限
+    checkPictureAuth(loginUser, picture);
+    // 调用接口
+    CreateOutPaintingTaskRequest request = new CreateOutPaintingTaskRequest();
+    CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();
+    input.setImageUrl(picture.getUrl());
+    request.setInput(input);
+    BeanUtils.copyProperties(createPictureOutPaintingTaskRequest, request);
+    return aliYunAiApi.createOutPaintingTask(request);
+
+  }
 }
