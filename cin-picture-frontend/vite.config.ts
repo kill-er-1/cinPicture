@@ -16,6 +16,11 @@ export default defineConfig({
     proxy: {
       //遇到/api开头的接口就会代理到后端
       '/api': 'http://localhost:8123',
+      '/cos': {
+        target: 'https://cin-1332172623.cos.ap-nanjing.myqcloud.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cos/, ''),
+      },
     },
   },
 })
