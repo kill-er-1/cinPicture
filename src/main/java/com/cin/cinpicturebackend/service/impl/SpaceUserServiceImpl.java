@@ -22,6 +22,7 @@ import com.cin.cinpicturebackend.service.SpaceUserService;
 import com.cin.cinpicturebackend.mapper.SpaceUserMapper;
 import com.cin.cinpicturebackend.service.UserService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,15 +34,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
-* @author cin
-* @description 针对表【space_user(空间用户关联)】的数据库操作Service实现
-* @createDate 2026-02-11 12:42:59
-*/
+ * @author cin
+ * @description 针对表【space_user(空间用户关联)】的数据库操作Service实现
+ * @createDate 2026-02-11 12:42:59
+ */
 @Service
 public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser>
-    implements SpaceUserService{
+        implements SpaceUserService {
 
     @Resource
+    @Lazy
     private SpaceService spaceService;
 
     @Resource
@@ -127,7 +129,8 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             return Collections.emptyList();
         }
         // 对象列表 => 封装对象列表
-        List<SpaceUserVO> spaceUserVOList = spaceUserList.stream().map(SpaceUserVO::objToVo).collect(Collectors.toList());
+        List<SpaceUserVO> spaceUserVOList = spaceUserList.stream().map(SpaceUserVO::objToVo)
+                .collect(Collectors.toList());
         // 1. 收集需要关联查询的用户 ID 和空间 ID
         Set<Long> userIdSet = spaceUserList.stream().map(SpaceUser::getUserId).collect(Collectors.toSet());
         Set<Long> spaceIdSet = spaceUserList.stream().map(SpaceUser::getSpaceId).collect(Collectors.toSet());
@@ -156,7 +159,3 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         return spaceUserVOList;
     }
 }
-
-
-
-
