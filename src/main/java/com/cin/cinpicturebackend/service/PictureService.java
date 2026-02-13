@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cin.cinpicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.cin.cinpicturebackend.model.dto.picture.CreatePictureOutPaintingTaskRequest;
+import com.cin.cinpicturebackend.model.dto.picture.PictureEditByBatchRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureEditRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureUploadRequest;
@@ -54,5 +55,7 @@ public interface PictureService extends IService<Picture> {
 
   CreateOutPaintingTaskResponse createPictureOutPaintingTask(
       CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, User loginUser);
+
+  void editPictureByBatch(PictureEditByBatchRequest pictureEditByBatchRequest, User loginUser);
 
 }

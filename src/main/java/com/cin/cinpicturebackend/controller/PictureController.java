@@ -32,6 +32,7 @@ import com.cin.cinpicturebackend.exception.BusinessException;
 import com.cin.cinpicturebackend.exception.ErrorCode;
 import com.cin.cinpicturebackend.exception.ThrowUtils;
 import com.cin.cinpicturebackend.model.dto.picture.CreatePictureOutPaintingTaskRequest;
+import com.cin.cinpicturebackend.model.dto.picture.PictureEditByBatchRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureEditRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.cin.cinpicturebackend.model.dto.picture.PictureReviewRequest;
@@ -316,5 +317,14 @@ public class PictureController {
     ThrowUtils.throwIf(StrUtil.isBlank(taskId), ErrorCode.PARAMS_ERROR);
     GetOutPaintingTaskResponse task = aliYunAiApi.getOutPaintingTask(taskId);
     return ResultUtils.success(task);
+  }
+
+  @PostMapping("/edit/batch")
+  public BaseResponse<Boolean> editPictureByBatch(@RequestBody PictureEditByBatchRequest pictureEditByBatchRequest,
+      HttpServletRequest request) {
+    ThrowUtils.throwIf(pictureEditByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+    User loginUser = userService.getLoginUser(request);
+    pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
+    return ResultUtils.success(true);
   }
 }
