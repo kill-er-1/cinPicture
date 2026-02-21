@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cin.cinpicturebackend.exception.BusinessException;
 import com.cin.cinpicturebackend.exception.ErrorCode;
 import com.cin.cinpicturebackend.exception.ThrowUtils;
+import com.cin.cinpicturebackend.manager.auth.StpKit;
 import com.cin.cinpicturebackend.model.dto.user.UserQueryRequest;
 import com.cin.cinpicturebackend.model.entity.User;
 import com.cin.cinpicturebackend.model.enums.UserRoleEnum;
@@ -98,7 +99,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //4.设置登录状态
         request.getSession().setAttribute(USER_LOGIN_STATE,user);
         //不会冲突，不同用户/不同浏览器/不同会话：各自有不同的 session（不同 `JSESSIONID`），即使 key 一样也互不影响
-
+        // 5. 记录用户登录态到 Sa-token，便于空间鉴权时使用，注意保证该用户信息与 SpringSession 中的信息过期时间一致
+        StpKit.SPACE.login(user.getId());
+        StpKit.SPACE.getSession().set(USER_LOGIN_STATE, user);
         return this.getLoginUserVO(user);
     }
 

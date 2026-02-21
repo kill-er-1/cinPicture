@@ -1,6 +1,7 @@
 package com.cin.cinpicturebackend.model.vo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -86,7 +87,12 @@ public class PictureVO implements Serializable {
     /**  
      * 编辑时间  
      */  
-    private Date editTime;  
+    private Date editTime;
+
+    /**
+     * 权限列表
+     */
+    private List<String> permissionList = new ArrayList<>();
   
     /**  
      * 更新时间  
