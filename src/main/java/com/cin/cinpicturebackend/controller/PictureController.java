@@ -168,6 +168,11 @@ public class PictureController {
     // 查询数据库
     Picture picture = pictureService.getById(id);
     ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
+    User loginUser = null;
+    Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+    if (userObj instanceof User) {
+      loginUser = (User) userObj;
+    }
     // 空间的图片，需要校验权限
     Space space = null;
     Long spaceId = picture.getSpaceId();
@@ -177,9 +182,11 @@ public class PictureController {
       space = spaceService.getById(spaceId);
       ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
     }
-    // 获取权限列表
-    User loginUser = userService.getLoginUser(request);
     List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
+    if (spaceId != null) {
+      ThrowUtils.throwIf(!permissionList.contains(SpaceUserPermissionConstant.PICTURE_VIEW),
+          ErrorCode.NO_AUTH_ERROR);
+    }
     PictureVO pictureVO = pictureService.getPictureVO(picture, request);
     pictureVO.setPermissionList(permissionList);
     // 获取封装类
@@ -212,13 +219,18 @@ public class PictureController {
       pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
       pictureQueryRequest.setNullSpaceId(true);
     } else {
-      // 私有空间
-      User loginUser = userService.getLoginUser(request);
+      boolean hasPermission = StpKit.SPACE.hasPermission(SpaceUserPermissionConstant.PICTURE_VIEW);
+      ThrowUtils.throwIf(!hasPermission, ErrorCode.NO_AUTH_ERROR);
       Space space = spaceService.getById(spaceId);
       ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
-      if (!loginUser.getId().equals(space.getUserId())) {
-        throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间权限");
+      User loginUser = null;
+      Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+      if (userObj instanceof User) {
+        loginUser = (User) userObj;
       }
+      List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
+      ThrowUtils.throwIf(!permissionList.contains(SpaceUserPermissionConstant.PICTURE_VIEW),
+          ErrorCode.NO_AUTH_ERROR);
     }
     // 查询数据库
     Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
